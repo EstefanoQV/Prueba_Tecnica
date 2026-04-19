@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: appointments_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - appointments_network
+
+  backend:
+    build: ./backend
+    container_name: appointments_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/appointments_db
+      - EMAIL_HOST=smtp.ethereal.email
+      - EMAIL_PORT=587
+      - EMAIL_USER=$bethel.kertzmann@ethereal.email
+      - EMAIL_PASS=$GGNMEKDdzvNz4EYGH3
+      - EMAIL_FROM=noreply@appointments.com
+    depends_on:
+      - mongo
+    networks:
+      - appointments_network
+
+  frontend:
+    build: ./frontend
+    container_name: appointments_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - appointments_network
+
+volumes:
+  mongo_data:
+
+networks:
+  appointments_network:
+    driver: bridge
